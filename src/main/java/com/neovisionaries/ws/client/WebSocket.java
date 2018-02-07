@@ -1089,6 +1089,7 @@ public class WebSocket
     private WebSocketFrame mServerCloseFrame;
     private WebSocketFrame mClientCloseFrame;
     private PerMessageCompressionExtension mPerMessageCompressionExtension;
+    private Masker payloadMasker;
 
 
     WebSocket(WebSocketFactory factory, boolean secure, String userInfo,
@@ -1262,6 +1263,14 @@ public class WebSocket
         }
     }
 
+    /**
+     * Setup payload masker. If not set then @see DefaultMasker is configured to mask payload bytes.
+     *
+     * @param payloadMasker
+     */
+    public void setPayloadMask(Masker payloadMasker) {
+        this.payloadMasker = payloadMasker;
+    }
 
     /**
      * Add a value for {@code Sec-WebSocket-Protocol}.
@@ -3165,8 +3174,7 @@ public class WebSocket
         {
             // Get the output stream of the socket through which
             // this client sends data to the server.
-            return new WebSocketOutputStream(
-                new BufferedOutputStream(socket.getOutputStream()));
+            return new WebSocketOutputStream(socket.getOutputStream(), this.payloadMasker);
         }
         catch (IOException e)
         {
